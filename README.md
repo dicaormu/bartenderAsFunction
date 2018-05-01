@@ -1,6 +1,6 @@
-#The bartender as a function
+# The bartender as a function
 
-##This repository is in construction
+## This repository is in construction
 
 ## requirements
 
