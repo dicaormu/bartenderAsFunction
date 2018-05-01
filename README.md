@@ -4,7 +4,7 @@
 
 ## requirements
 
-go > 1.10 
-go dep
-sam local
-docker
+* go > 1.10 
+* go dep
+* sam local
+* docker
