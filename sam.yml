@@ -1,0 +1,120 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Transform: 'AWS::Serverless-2016-10-31'
+Description: AWS SAM template for bartender hands-on
+Parameters:
+  User:
+    Type: String
+    Default: user1
+Resources:
+  LambdaRuleReadCommand:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: readCommand
+      Timeout: 10
+      Runtime: go1.x
+      CodeUri: bin/readCommand
+      Policies:
+      - AWSIoTThingsRegistration
+      - AWSIoTConfigAccess
+      - AWSIoTDataAccess
+      - DynamoDBCrudPolicy:
+          TableName: !Sub ${User}-Command
+      Environment:
+        Variables:
+          TABLE_COMMANDS: !Sub ${User}-Command
+      Events:
+        EventCommandReception:
+          Type: IoTRule
+          Name: IotRuleCommandReception
+          Properties:
+            AwsIotSqlVersion: "2016-03-23"
+            Sql: "SELECT *,topic(3) as deviceid FROM 'topic_drunk'"
+  LambdaGetCommands:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: getCommand
+      Timeout: 10
+      Runtime: go1.x
+      CodeUri: bin/getCommand
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName: !Sub ${User}-Command
+      Environment:
+        Variables:
+          TABLE_COMMANDS: !Sub ${User}-Command
+      Events:
+        CommandsGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref vls
+            Path: /command
+            Method: GET
+  LambdaGetFacture:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: getFacture
+      Timeout: 10
+      Runtime: go1.x
+      CodeUri: bin/getFacture
+      Policies:
+      - DynamoDBReadPolicy:
+          TableName: !Sub ${User}-Command
+      Environment:
+        Variables:
+          TABLE_COMMANDS: !Sub ${User}-Command
+      Events:
+        CommandsGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref vls
+            Path: /command
+            Method: GET
+  Bartender:
+    Type: AWS::Serverless::Api
+    Properties:
+      EndpointConfiguration: REGIONAL
+      Name: !Sub ${User} - Bartender Api
+      DefinitionBody:
+        swagger: "2.0"
+        info:
+          version: "2017-11-09T13:59:26Z"
+          title: !Sub "${AWS::StackName}-api-test"
+        basePath: !Sub "/test"
+        schemes:
+          - "https"
+        paths:
+          /command:
+            get:
+              summary: Get unattended commands
+              operationId: CommandsGet
+              consumes:
+              - application/json
+              produces:
+              - application/json
+              responses:
+                200:
+                  description: "200 response"
+                  schema:
+                    $ref: "#/definitions/Command"
+        definitions:
+          Command:
+            type: object
+            properties:
+              beerAmt:
+                type: int
+              foodAmt:
+                type: int
+      StageName: 'test'
+  DynamoDBCommandTable:
+    Type: AWS::DynamoDB::Table
+    Properties:
+      TableName: !Sub '${User}-Command'
+      AttributeDefinitions:
+         - AttributeName: id
+           AttributeType: S
+      KeySchema:
+         - AttributeName: id
+           KeyType: HASH
+      ProvisionedThroughput:
+         ReadCapacityUnits: 1
+         WriteCapacityUnits: 1

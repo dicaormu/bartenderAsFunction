@@ -1,0 +1,10 @@
+bin
+# Serverless directories
+vendor
+.serverless
+# others
+Gopkg.lock
+*.retry
+vendor.orig/
+.idea
+.DS_Store
