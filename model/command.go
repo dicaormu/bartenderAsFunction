@@ -9,13 +9,11 @@ type Command struct {
 
 type Item struct {
 	Name   string `json:"item"`
-	Amount int `json:"amount"`
+	Amount int    `json:"amount"`
 	Served bool   `json:"served"`
 }
 
 type CommandRequest struct {
-	Food []Item
-	Beer []Item
+	Food []Item `json:"food"`
+	Beer []Item `json:"beer"`
 }
-
-

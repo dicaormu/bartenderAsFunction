@@ -6,6 +6,7 @@ import (
 	"errors"
 	"bartenderAsFunction/testUtils"
 	"github.com/stretchr/testify/assert"
+	"encoding/json"
 )
 
 func TestHandlerShouldReturnError(t *testing.T) {
@@ -17,11 +18,15 @@ func TestHandlerShouldReturnError(t *testing.T) {
 }
 
 func TestHandlerShouldReturnErrorNotValidDate(t *testing.T) {
-	beerItems := []model.Item{{Served:false,Name:"aaa",Amount:3}}
-	foodItems := []model.Item{{Served:false,Name:"bbb",Amount:2}}
+	commandIot := `{"food": [{"item":"pizza","amount":2}], "beer": [{"item":"1664","amount":3}]}`
+	iotRequest := model.CommandRequest{}
+
+	json.Unmarshal([]byte(commandIot),&iotRequest)
+
+	beerItems := []model.Item{{Served:false,Name:"1664",Amount:3}}
+	foodItems := []model.Item{{Served:false,Name:"pizza",Amount:2}}//
 	mock := testUtils.CommandConnectionMock{Command:model.Command{Beer: beerItems,Food:foodItems}}
 	DataConnectionManager = &mock
-	iotRequest := model.CommandRequest{Food:foodItems,Beer:beerItems}
 	err := Handler(iotRequest)
 	assert.Equal(t, err, nil)
 }

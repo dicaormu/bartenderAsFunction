@@ -21,7 +21,7 @@ type CommandConnectionInterface interface {
 	GetCommandById(id string) model.Command
 }
 
-func  (con *CommandConnection) GetCommandById(id string) model.Command {
+func (con *CommandConnection) GetCommandById(id string) model.Command {
 	tableName := os.Getenv("TABLE_COMMANDS")
 	result, err := con.DynamoConnection.GetItem(&dynamodb.GetItemInput{
 		TableName: aws.String(tableName),
@@ -48,7 +48,6 @@ func  (con *CommandConnection) GetCommandById(id string) model.Command {
 	}
 	return command
 }
-
 
 func (con *CommandConnection) SaveCommand(command model.Command) error {
 	tableName := os.Getenv("TABLE_COMMANDS")

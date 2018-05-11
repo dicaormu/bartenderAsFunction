@@ -7,6 +7,7 @@ import (
 	"errors"
 	"time"
 	"fmt"
+	"encoding/json"
 )
 
 type CommandConnectionMock struct {
@@ -24,6 +25,9 @@ func isDate(date string) bool {
 }
 
 func (service *CommandConnectionMock) SaveCommand(command model.Command) error {
+	bytes, _ := json.Marshal(command)
+	fmt.Println(string(bytes))
+
 	if service.ExpectedError != nil {
 		return service.ExpectedError
 	}

@@ -9,10 +9,12 @@ Resources:
   LambdaRuleReadCommand:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: readCommand
+      Handler: bin/readCommand
       Timeout: 10
       Runtime: go1.x
-      CodeUri: bin/readCommand
+      CodeUri:
+        Bucket: handsonbartender
+        Key: !Sub ${User}/readCommand.zip
       Policies:
       - AWSIoTThingsRegistration
       - AWSIoTConfigAccess
@@ -28,14 +30,16 @@ Resources:
           Name: IotRuleCommandReception
           Properties:
             AwsIotSqlVersion: "2016-03-23"
-            Sql: "SELECT *,topic(3) as deviceid FROM 'topic_drunk'"
+            Sql: "SELECT * FROM 'topic_drunk'"
   LambdaGetCommands:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: getCommand
+      Handler: bin/getCommand
       Timeout: 10
       Runtime: go1.x
-      CodeUri: bin/getCommand
+      CodeUri:
+        Bucket: handsonbartender
+        Key: !Sub ${User}/getCommand.zip
       Policies:
       - DynamoDBCrudPolicy:
           TableName: !Sub ${User}-Command
@@ -46,16 +50,18 @@ Resources:
         CommandsGet:
           Type: Api
           Properties:
-            RestApiId: !Ref vls
+            RestApiId: !Ref Bartender
             Path: /command
             Method: GET
   LambdaServeCommands:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: serveCommand
+      Handler: bin/serveCommand
       Timeout: 10
       Runtime: go1.x
-      CodeUri: bin/serveCommand
+      CodeUri:
+        Bucket: handsonbartender
+        Key: !Sub ${User}/serveCommand.zip
       Policies:
       - DynamoDBCrudPolicy:
           TableName: !Sub ${User}-Command
@@ -66,16 +72,18 @@ Resources:
         CommandsGet:
           Type: Api
           Properties:
-            RestApiId: !Ref vls
-            Path: /command/{idCommand}/{type}/serve:
+            RestApiId: !Ref Bartender
+            Path: /command/{idCommand}/{type}/serve
             Method: POST
   LambdaGetFacture:
     Type: AWS::Serverless::Function
     Properties:
-      Handler: getFacture
+      Handler: bin/getFacture
       Timeout: 10
       Runtime: go1.x
-      CodeUri: bin/getFacture
+      CodeUri:
+        Bucket: handsonbartender
+        Key: !Sub ${User}/getFacture.zip
       Policies:
       - DynamoDBReadPolicy:
           TableName: !Sub ${User}-Command
@@ -86,7 +94,7 @@ Resources:
         CommandsGet:
           Type: Api
           Properties:
-            RestApiId: !Ref vls
+            RestApiId: !Ref Bartender
             Path: /bill
             Method: GET
   Bartender:
@@ -112,10 +120,20 @@ Resources:
               produces:
               - application/json
               responses:
-                200:
+                '200':
                   description: "200 response"
                   schema:
                     $ref: "#/definitions/Command"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri:
+                  Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaGetCommands.Arn}/invocations"
+                passthroughBehavior: "when_no_match"
+                httpMethod: "POST"
+                contentHandling: "CONVERT_TO_TEXT"
+                type: "aws_proxy"
           /bill:
             get:
               summary: Get all commands attended
@@ -125,10 +143,20 @@ Resources:
               produces:
               - application/json
               responses:
-                200:
+                '200':
                   description: "200 response"
                   schema:
                     $ref: "#/definitions/Command"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri:
+                  Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaGetFacture.Arn}/invocations"
+                passthroughBehavior: "when_no_match"
+                httpMethod: "POST"
+                contentHandling: "CONVERT_TO_TEXT"
+                type: "aws_proxy"
           /command/{idCommand}/{type}/serve:
             post:
               summary: Serve a command
@@ -158,10 +186,20 @@ Resources:
                 schema:
                   $ref: '#/definitions/Item'
               responses:
-                200:
+                '200':
                   description: "200 response"
                   schema:
                     $ref: "#/definitions/Command"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri:
+                  Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaServeCommands.Arn}/invocations"
+                passthroughBehavior: "when_no_match"
+                httpMethod: "POST"
+                contentHandling: "CONVERT_TO_TEXT"
+                type: "aws_proxy"
         definitions:
           Bill:
             type: object
@@ -193,7 +231,7 @@ Resources:
               name:
                 type: string
               amount:
-                type: string
+                type: int
       StageName: 'test'
   DynamoDBCommandTable:
     Type: AWS::DynamoDB::Table
