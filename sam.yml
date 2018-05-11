@@ -49,6 +49,26 @@ Resources:
             RestApiId: !Ref vls
             Path: /command
             Method: GET
+  LambdaServeCommands:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: serveCommand
+      Timeout: 10
+      Runtime: go1.x
+      CodeUri: bin/serveCommand
+      Policies:
+      - DynamoDBCrudPolicy:
+          TableName: !Sub ${User}-Command
+      Environment:
+        Variables:
+          TABLE_COMMANDS: !Sub ${User}-Command
+      Events:
+        CommandsGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref vls
+            Path: /command/{idCommand}/{type}/serve:
+            Method: POST
   LambdaGetFacture:
     Type: AWS::Serverless::Function
     Properties:
@@ -67,7 +87,7 @@ Resources:
           Type: Api
           Properties:
             RestApiId: !Ref vls
-            Path: /command
+            Path: /bill
             Method: GET
   Bartender:
     Type: AWS::Serverless::Api
@@ -96,14 +116,84 @@ Resources:
                   description: "200 response"
                   schema:
                     $ref: "#/definitions/Command"
+          /bill:
+            get:
+              summary: Get all commands attended
+              operationId: BillGet
+              consumes:
+              - application/json
+              produces:
+              - application/json
+              responses:
+                200:
+                  description: "200 response"
+                  schema:
+                    $ref: "#/definitions/Command"
+          /command/{idCommand}/{type}/serve:
+            post:
+              summary: Serve a command
+              operationId: CommandsPost
+              consumes:
+              - application/json
+              produces:
+              - application/json
+              parameters:
+              - in: path
+                name: idCommand
+                required: true
+                description: The id of the command you are going to serve.
+                type: string
+              - in: path
+                name: type
+                required: true
+                description: The type (food or beer) to serve.
+                type: string
+                enum:
+                - beer
+                - food
+              - in: body
+                name: body
+                description: the item to serve
+                required: true
+                schema:
+                  $ref: '#/definitions/Item'
+              responses:
+                200:
+                  description: "200 response"
+                  schema:
+                    $ref: "#/definitions/Command"
         definitions:
+          Bill:
+            type: object
+            properties:
+              food:
+                type: array
+                items:
+                  $ref: '#/definitions/Item'
+              beer:
+                type: array
+                items:
+                  $ref: '#/definitions/Item'
           Command:
             type: object
             properties:
-              beerAmt:
-                type: int
-              foodAmt:
-                type: int
+              id:
+                type: string
+              beer:
+                type: array
+                items:
+                  $ref: '#/definitions/Item'
+              food:
+                type: array
+                items:
+                  $ref: '#/definitions/Item'
+          Item:
+            type: object
+            properties:
+              name:
+                type: string
+              amount:
+                type: string
       StageName: 'test'
   DynamoDBCommandTable:
     Type: AWS::DynamoDB::Table
