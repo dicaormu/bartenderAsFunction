@@ -50,12 +50,13 @@ func TestHandlerShouldReturnOneBeer(t *testing.T) {
 	DataConnectionManager = &mock
 	response, _ := Handler(events.APIGatewayProxyRequest{})
 	assert.Equal(t, response.StatusCode, 200)
-	resultCommand := model.Command{}
+	var resultCommand []model.Command
 	json.Unmarshal([]byte(response.Body), &resultCommand)
-	assert.Equal(t, resultCommand.IdCommand, "111")
-	assert.Len(t, resultCommand.Food, 0)
-	assert.Len(t, resultCommand.Beer, 1)
-	assert.Equal(t, resultCommand.Beer[0].Name, "leffe")
+	assert.Len(t, resultCommand, 1)
+	assert.Equal(t, resultCommand[0].IdCommand, "111")
+	assert.Len(t, resultCommand[0].Food, 0)
+	assert.Len(t, resultCommand[0].Beer, 1)
+	assert.Equal(t, resultCommand[0].Beer[0].Name, "leffe")
 }
 
 func TestHandlerShouldReturnOneFood(t *testing.T) {
@@ -64,10 +65,11 @@ func TestHandlerShouldReturnOneFood(t *testing.T) {
 	DataConnectionManager = &mock
 	response, _ := Handler(events.APIGatewayProxyRequest{})
 	assert.Equal(t, response.StatusCode, 200)
-	resultCommand := model.Command{}
+	var resultCommand []model.Command
 	json.Unmarshal([]byte(response.Body), &resultCommand)
-	assert.Equal(t, resultCommand.IdCommand, "222")
-	assert.Len(t, resultCommand.Beer, 0)
-	assert.Len(t, resultCommand.Food, 1)
-	assert.Equal(t, resultCommand.Food[0].Name, "pizza")
+	assert.Len(t, resultCommand, 1)
+	assert.Equal(t, resultCommand[0].IdCommand, "222")
+	assert.Len(t, resultCommand[0].Beer, 0)
+	assert.Len(t, resultCommand[0].Food, 1)
+	assert.Equal(t, resultCommand[0].Food[0].Name, "pizza")
 }

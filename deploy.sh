@@ -22,6 +22,6 @@ done
 ## because it is more convenient for the workshop
 echo "deploying...."
 
-sam deploy --template-file ./sam.yml --stack-name $P_USER-bartender-sam-deploy --capabilities CAPABILITY_IAM --profile xebia
+sam deploy --template-file ./sam.yml --stack-name $P_USER-bartender-sam-deploy --parameter-overrides User=$P_USER --capabilities CAPABILITY_IAM --profile xebia
 
 rm bin/*.zip

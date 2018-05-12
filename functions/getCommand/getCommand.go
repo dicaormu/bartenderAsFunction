@@ -6,6 +6,7 @@ import (
 	"bartenderAsFunction/dao"
 	"bartenderAsFunction/model"
 	"encoding/json"
+	"fmt"
 )
 
 var DataConnectionManager dao.CommandConnectionInterface
@@ -16,16 +17,20 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	if err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: 404, Body: err.Error()}, nil
 	}
-	items := model.Command{}
+	var commandsReturn []model.Command
+	// TODO 2 iterate over items to get non served commands
 	for _, command := range commands {
+		items := model.Command{}
 		items.Beer = getNoServedItemsForCommand(command.Beer)
 		items.Food = getNoServedItemsForCommand(command.Food)
 		if len(items.Beer) > 0 || len(items.Food) > 0 {
 			items.IdCommand = command.IdCommand
+			commandsReturn = append(commandsReturn, items)
 		}
 	}
 	// TODO 3. return unserved commands
-	body, _ := json.Marshal(items)
+	body, _ := json.Marshal(commandsReturn)
+	fmt.Println("unserved commands return ", string(body))
 	return events.APIGatewayProxyResponse{StatusCode: 200, Body: string(body)}, nil
 }
 
