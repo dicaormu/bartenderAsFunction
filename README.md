@@ -32,8 +32,6 @@ Your profile should be called *xebia* (or modify the provided scripts to use the
 
 During this exercise, if you have any question, you can go to the [faq](FAQ.md).
 
-**Before starting**: be sure you have changed the parameter *User* of the sam.yml file from *user1* to **your name**
-
 ![the exercise](https://docs.google.com/drawings/d/e/2PACX-1vQo9d9tz8Mm0s_NxGLRni0yA6V7r6YDlaJtOHQLblMqXi9jWjkIfv-v8L0eHsnF_XSIbTK2Yg7tecY0/pub?w=480&h=360)
 
 ### Step 1
