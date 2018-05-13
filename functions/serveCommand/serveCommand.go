@@ -16,22 +16,19 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	toServe := model.Item{}
 	json.Unmarshal([]byte(request.Body), &toServe)
 
-	// TODO 1. read the command
-	command := DataConnectionManager.GetCommandById(idCommand)
-	// TODO 2. Verify command exist
-	if command.IdCommand == "" {
-		return events.APIGatewayProxyResponse{StatusCode: 200, Body: "not available command to serve"}, nil
-	}
-	// TODO 3. search item
+	// TODO 1. read the command by idCommand. Hint, there are a dao package with all you need. Use the DataConnectionManager var
+
+	// TODO 2. Verify command exist. If not, return 200 but with body "not available command to serve"
+	// TODO 3. search item (just implement method in TODO 3
 	if typeItem == "beer" {
 		serveCommand(&command.Beer, toServe.Name)
 	} else {
 		serveCommand(&command.Food, toServe.Name)
 	}
-	// TODO 4. save command
-	DataConnectionManager.SaveCommand(command)
-	body, _ := json.Marshal(command)
-	return events.APIGatewayProxyResponse{StatusCode: 200, Body: string(body)}, nil
+	// TODO 4. save command. User dao package
+
+	// And return 200 with command. Use Json marshall to transform the command in []byte
+	return
 }
 
 // TODO 3
