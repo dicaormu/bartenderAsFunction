@@ -30,6 +30,15 @@ Your profile should be called *xebia* (or modify the provided scripts to use the
 
 ## The exercise 
 
+Create your GOPATH environment variable with the path to your go projects.
+Inside this path, create a folder src.
+
+```
+$ cd $GOPATH/src
+
+$ git clone https://github.com/dicaormu/bartenderAsFunction
+```
+
 During this exercise, if you have any question, you can go to the [faq](FAQ.md).
 You can also take a look to the "solution" branch with a suggested solution.
 
