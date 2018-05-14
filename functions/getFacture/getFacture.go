@@ -3,7 +3,6 @@ package main
 import (
 	"github.com/aws/aws-lambda-go/events"
 	"github.com/aws/aws-lambda-go/lambda"
-	"encoding/json"
 	"bartenderAsFunction/dao"
 	"bartenderAsFunction/model"
 )
@@ -31,9 +30,8 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	// TODO Hint, use json marshall function to transform struct to []byte
 
 	//TODO return a status 200 with body
-	return
+	return events.APIGatewayProxyResponse{}, nil
 }
-
 
 // TODO 2
 func getItemsForType(items []model.Item, classifiedItems *map[string]int) {
@@ -48,7 +46,7 @@ func getItemsForType(items []model.Item, classifiedItems *map[string]int) {
 // TODO 3
 func getItemsFromMap(itemMap map[string]int) (items []model.Item) {
 	for key, value := range itemMap {
-		items = append(items, model.Item{Name: key, Amount: value, Served:true})
+		items = append(items, model.Item{Name: key, Amount: value, Served: true})
 	}
 	return items
 }

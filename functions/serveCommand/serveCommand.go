@@ -6,6 +6,7 @@ import (
 	"bartenderAsFunction/dao"
 	"bartenderAsFunction/model"
 	"github.com/aws/aws-lambda-go/lambda"
+	"fmt"
 )
 
 var DataConnectionManager dao.CommandConnectionInterface
@@ -15,8 +16,10 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	typeItem := request.PathParameters["type"]
 	toServe := model.Item{}
 	json.Unmarshal([]byte(request.Body), &toServe)
+	fmt.Println(idCommand)
 
 	// TODO 1. read the command by idCommand. Hint, there are a dao package with all you need. Use the DataConnectionManager var
+	var command model.Command
 
 	// TODO 2. Verify command exist. If not, return 200 but with body "not available command to serve"
 	// TODO 3. search item (just implement method in TODO 3
@@ -28,7 +31,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	// TODO 4. save command. User dao package
 
 	// And return 200 with command. Use Json marshall to transform the command in []byte
-	return
+	return events.APIGatewayProxyResponse{}, nil
 }
 
 // TODO 3

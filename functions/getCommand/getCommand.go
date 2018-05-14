@@ -5,7 +5,6 @@ import (
 	"github.com/aws/aws-lambda-go/lambda"
 	"bartenderAsFunction/dao"
 	"bartenderAsFunction/model"
-	"encoding/json"
 	"fmt"
 )
 
@@ -18,6 +17,7 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 
 	//
 	var commandsReturn []model.Command
+	fmt.Println(commandsReturn)
 	// TODO 2 iterate over items to get non served commands
 	for _, command := range commands {
 		items := model.Command{}
@@ -28,15 +28,16 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	}
 	// TODO 3. return unserved commands. Hint, use json marshall function to transform struct to []byte
 
-
 	//TODO return a status 200 with body
-	return
+	return events.APIGatewayProxyResponse{}, nil
 }
 
 // TODO 2. complete function to return no served items
 func getNoServedItemsForCommand(items []model.Item) (noServedItems []model.Item) {
 	for _, item := range items {
+		fmt.Println(item)
 		// TODO append no served item
+
 	}
 	return noServedItems
 }
