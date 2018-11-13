@@ -30,7 +30,7 @@ Resources:
           Name: IotRuleCommandReception
           Properties:
             AwsIotSqlVersion: "2016-03-23"
-            Sql: "SELECT * FROM 'topic_drunk'"
+            Sql: "SELECT * FROM 'bartender/topic_drunk'"
   LambdaGetCommands:
     Type: AWS::Serverless::Function
     Properties:
@@ -52,50 +52,6 @@ Resources:
           Properties:
             RestApiId: !Ref Bartender
             Path: /command
-            Method: GET
-  LambdaServeCommands:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: bin/serveCommand
-      Timeout: 10
-      Runtime: go1.x
-      CodeUri:
-        Bucket: handsonbartender
-        Key: !Sub ${User}/serveCommand.zip
-      Policies:
-      - DynamoDBCrudPolicy:
-          TableName: !Sub ${User}-Command
-      Environment:
-        Variables:
-          TABLE_COMMANDS: !Sub ${User}-Command
-      Events:
-        CommandsGet:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Bartender
-            Path: /command/{idCommand}/{type}/serve
-            Method: POST
-  LambdaGetFacture:
-    Type: AWS::Serverless::Function
-    Properties:
-      Handler: bin/getFacture
-      Timeout: 10
-      Runtime: go1.x
-      CodeUri:
-        Bucket: handsonbartender
-        Key: !Sub ${User}/getFacture.zip
-      Policies:
-      - DynamoDBReadPolicy:
-          TableName: !Sub ${User}-Command
-      Environment:
-        Variables:
-          TABLE_COMMANDS: !Sub ${User}-Command
-      Events:
-        CommandsGet:
-          Type: Api
-          Properties:
-            RestApiId: !Ref Bartender
-            Path: /bill
             Method: GET
   Bartender:
     Type: AWS::Serverless::Api
@@ -130,72 +86,6 @@ Resources:
                     statusCode: "200"
                 uri:
                   Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaGetCommands.Arn}/invocations"
-                passthroughBehavior: "when_no_match"
-                httpMethod: "POST"
-                contentHandling: "CONVERT_TO_TEXT"
-                type: "aws_proxy"
-          /bill:
-            get:
-              summary: Get all commands attended
-              operationId: BillGet
-              consumes:
-              - application/json
-              produces:
-              - application/json
-              responses:
-                '200':
-                  description: "200 response"
-                  schema:
-                    $ref: "#/definitions/Command"
-              x-amazon-apigateway-integration:
-                responses:
-                  default:
-                    statusCode: "200"
-                uri:
-                  Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaGetFacture.Arn}/invocations"
-                passthroughBehavior: "when_no_match"
-                httpMethod: "POST"
-                contentHandling: "CONVERT_TO_TEXT"
-                type: "aws_proxy"
-          /command/{idCommand}/{type}/serve:
-            post:
-              summary: Serve a command
-              operationId: CommandsPost
-              consumes:
-              - application/json
-              produces:
-              - application/json
-              parameters:
-              - in: path
-                name: idCommand
-                required: true
-                description: The id of the command you are going to serve.
-                type: string
-              - in: path
-                name: type
-                required: true
-                description: The type (food or beer) to serve.
-                type: string
-                enum:
-                - beer
-                - food
-              - in: body
-                name: body
-                description: the item to serve
-                required: true
-                schema:
-                  $ref: '#/definitions/Item'
-              responses:
-                '200':
-                  description: "200 response"
-                  schema:
-                    $ref: "#/definitions/Command"
-              x-amazon-apigateway-integration:
-                responses:
-                  default:
-                    statusCode: "200"
-                uri:
-                  Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaServeCommands.Arn}/invocations"
                 passthroughBehavior: "when_no_match"
                 httpMethod: "POST"
                 contentHandling: "CONVERT_TO_TEXT"
