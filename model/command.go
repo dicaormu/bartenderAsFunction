@@ -39,10 +39,13 @@ func (cmd IotBeerCommandFromIot) UnmarshalAssociatedData() ([]BeerPrediction, er
 	var prediction []BeerPrediction
 	re := regexp.MustCompile(`^\[\((\d*.\d*), ('.*')\), \((\d*.\d*), ('.*')\), \((\d*.\d*), ('.*')\), \((\d*.\d*), ('.*')\), \((\d*.\d*), ('.*')\)\]`)
 	submatch := re.FindStringSubmatch(cmd.Payload)
+	if len(submatch) < 10 {
+		return prediction, nil
+	}
 	for i := 0; i < 5; i++ {
 		var unmarshalled BeerPrediction
 		unmarshalled.Confidence, _ = strconv.ParseFloat(submatch[i*2+1], 64)
-		unmarshalled.Label = strings.Replace(submatch[i*2+2],"'","",-1)
+		unmarshalled.Label = strings.Replace(submatch[i*2+2], "'", "", -1)
 		prediction = append(prediction, unmarshalled)
 	}
 	return prediction, nil

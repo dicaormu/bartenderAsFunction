@@ -50,10 +50,14 @@ func (service *CommandConnectionMock) GetCommands() ([]model.Command, error) {
 }
 
 func (service *CommandConnectionMock) GetCommandById(id string) model.Command {
-	fmt.Println("id:::::",id)
-	fmt.Println("service id:::::",service.Command.IdCommand )
+	fmt.Println("id:::::", id)
+	fmt.Println("service id:::::", service.Command.IdCommand)
 	if service.Command.IdCommand == id {
 		return service.Command
 	}
 	return model.Command{}
+}
+
+func (service *CommandConnectionMock) GetLastCommand() (*model.Command, error) {
+	return &service.Command, nil
 }

@@ -19,6 +19,7 @@ type CommandConnectionInterface interface {
 	SaveCommand(command model.Command) error
 	GetCommands() ([]model.Command, error)
 	GetCommandById(id string) model.Command
+	GetLastCommand()(*model.Command, error)
 }
 
 func (con *CommandConnection) GetCommandById(id string) model.Command {
@@ -87,6 +88,27 @@ func (con *CommandConnection) GetCommands() ([]model.Command, error) {
 		fmt.Printf("getting %d commands", len(commands))
 	}
 	return commands, nil
+}
+
+func (con *CommandConnection) GetLastCommand() (*model.Command, error) {
+	tableName := os.Getenv("TABLE_COMMANDS")
+	params := &dynamodb.ScanInput{
+		TableName: aws.String(tableName),
+	}
+	result, err := con.DynamoConnection.Scan(params)
+	if err != nil {
+		fmt.Println("error getting dynamo", err)
+		return nil, err
+	}
+	var command model.Command
+	for _, v := range result.Items {
+		var item model.Command
+		err = dynamodbattribute.UnmarshalMap(v, &item)
+		if command.DateCommand < item.DateCommand {
+			command = item
+		}
+	}
+	return &command, nil
 }
 
 func CreateCommandConnection() CommandConnectionInterface {
