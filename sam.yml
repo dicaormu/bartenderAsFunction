@@ -1,6 +1,6 @@
 AWSTemplateFormatVersion: '2010-09-09'
 Transform: 'AWS::Serverless-2016-10-31'
-Description: AWS SAM template for bartender hands-on
+Description: AWS SAM template for bartender
 Parameters:
   User:
     Type: String
@@ -53,6 +53,40 @@ Resources:
             RestApiId: !Ref Bartender
             Path: /command
             Method: GET
+  LambdaGetForChangingBarStatusForServer:
+    Type: AWS::Serverless::Function
+    Properties:
+      Handler: bin/getToChangeBarStatus
+      Timeout: 10
+      Runtime: go1.x
+      CodeUri:
+        Bucket: bucketbartender
+        Key: !Sub ${User}/getToChangeBarStatus.zip
+      Policies:
+      - AWSIoTThingsRegistration
+      - AWSIoTConfigAccess
+      - AWSIoTDataAccess
+      - Version: '2012-10-17'
+        Statement:
+        - Effect: Allow
+          Action:
+          - iot:DescribeEndpoint
+          - iot:SearchIndex
+          Resource:
+          - '*'
+      - AWSIoTDataAccess
+      - DynamoDBCrudPolicy:
+          TableName: !Sub ${User}-Command
+      Environment:
+        Variables:
+          TABLE_COMMANDS: !Sub ${User}-Command
+      Events:
+        CommandsGet:
+          Type: Api
+          Properties:
+            RestApiId: !Ref Bartender
+            Path: /barStatus
+            Method: GET
   Bartender:
     Type: AWS::Serverless::Api
     Properties:
@@ -86,6 +120,27 @@ Resources:
                     statusCode: "200"
                 uri:
                   Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaGetCommands.Arn}/invocations"
+                passthroughBehavior: "when_no_match"
+                httpMethod: "POST"
+                contentHandling: "CONVERT_TO_TEXT"
+                type: "aws_proxy"
+          /barStatus:
+            get:
+              summary: Change the bar status. Its is a get for insesrtion in slides
+              operationId: barstatusChange
+              consumes:
+              - application/json
+              produces:
+              - application/json
+              responses:
+                '200':
+                  description: "200 response"
+              x-amazon-apigateway-integration:
+                responses:
+                  default:
+                    statusCode: "200"
+                uri:
+                  Fn::Sub: "arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${LambdaGetForChangingBarStatusForServer.Arn}/invocations"
                 passthroughBehavior: "when_no_match"
                 httpMethod: "POST"
                 contentHandling: "CONVERT_TO_TEXT"
