@@ -16,6 +16,7 @@ I give you also the structure of the *waiter* project. It includes the *aws-sam*
 
 ## Before you start: Requirements
 
+* [aws cli](https://docs.aws.amazon.com/fr_fr/cli/latest/userguide/awscli-install-bundle.html) 
 * go > 1.10 
 * go dep
 * [sam local](https://github.com/awslabs/aws-sam-cli)
