@@ -18,7 +18,30 @@ type CommandConnection struct {
 type CommandConnectionInterface interface {
 	SaveCommand(command model.Command) error
 	GetCommands() ([]model.Command, error)
+	GetCommandsByClient(idClient string) ([]model.Command, error)
 	GetCommandById(id string) model.Command
+}
+
+func (con *CommandConnection) GetCommandsByClient(idClient string) ([]model.Command, error) {
+	tableName := os.Getenv("TABLE_COMMANDS")
+	params := &dynamodb.ScanInput{
+		TableName: aws.String(tableName),
+	}
+	result, err := con.DynamoConnection.Scan(params)
+	if err != nil {
+		fmt.Println("error getting dynamo", err)
+		return nil, err
+	}
+	var commands []model.Command
+	for _, v := range result.Items {
+		var item model.Command
+		err = dynamodbattribute.UnmarshalMap(v, &item)
+		if item.Client == idClient {
+			commands = append(commands, item)
+			fmt.Printf("getting %d commands", len(commands))
+		}
+	}
+	return commands, nil
 }
 
 func (con *CommandConnection) GetCommandById(id string) model.Command {

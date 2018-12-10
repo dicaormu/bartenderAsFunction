@@ -15,9 +15,8 @@ func Handler(iotRequest model.CommandRequest) error {
 	// TODO 1. generate id to the command (uuid)
 	uid, _ := uuid.NewV4()
 	fmt.Println("food:",iotRequest.Food)
-	fmt.Println("beer:",iotRequest.Beer)
 	// TODO 2. generate command (model.command) with date in utc format
-	command := model.Command{IdCommand: uid.String(), DateCommand: time.Now().UTC().Format(time.RFC3339), Food: iotRequest.Food, Beer: iotRequest.Beer}
+	command := model.Command{IdCommand: uid.String(), DateCommand: time.Now().UTC().Format(time.RFC3339), Food: iotRequest.Food}
 	// TODO 3. save command in dynamo
 	saveCommandError := DataConnectionManager.SaveCommand(command)
 	if saveCommandError != nil {

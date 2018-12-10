@@ -49,6 +49,12 @@ func (service *CommandConnectionMock) GetCommands() ([]model.Command, error) {
 	return aaa, service.ExpectedError
 }
 
+func (service *CommandConnectionMock) GetCommandsByClient(idClient string) ([]model.Command, error) {
+	var aaa []model.Command
+	aaa = append(aaa, service.Command)
+	return aaa, service.ExpectedError
+}
+
 func (service *CommandConnectionMock) GetCommandById(id string) model.Command {
 	fmt.Println("id:::::",id)
 	fmt.Println("service id:::::",service.Command.IdCommand )

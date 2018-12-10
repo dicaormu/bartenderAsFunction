@@ -13,7 +13,7 @@ lambda_name=`basename $folder | sed 's/{//' | sed 's/}//'`
 echo $lambda_name
 zip bin/$lambda_name.zip bin/$lambda_name
 
-aws s3api put-object --bucket handsonbartender --key $P_USER/$lambda_name.zip --body bin/$lambda_name.zip --profile xebia
+aws s3api put-object --bucket handsonbartender --key $P_USER/$lambda_name.zip --body bin/$lambda_name.zip --profile epf
 
 done
 
@@ -22,6 +22,6 @@ done
 ## because it is more convenient for the workshop
 echo "deploying...."
 
-sam deploy --template-file ./sam.yml --stack-name $P_USER-bartender-sam-deploy --parameter-overrides User=$P_USER --capabilities CAPABILITY_IAM --profile xebia
+sam deploy --template-file ./sam.yml --stack-name $P_USER-bartender-sam-deploy --parameter-overrides User=$P_USER --capabilities CAPABILITY_IAM --profile epf
 
 rm bin/*.zip

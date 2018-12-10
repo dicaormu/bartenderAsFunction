@@ -1,12 +1,12 @@
 package main
 
 import (
-	"github.com/aws/aws-lambda-go/events"
-	"github.com/aws/aws-lambda-go/lambda"
 	"bartenderAsFunction/dao"
 	"bartenderAsFunction/model"
 	"encoding/json"
 	"fmt"
+	"github.com/aws/aws-lambda-go/events"
+	"github.com/aws/aws-lambda-go/lambda"
 )
 
 var DataConnectionManager dao.CommandConnectionInterface
@@ -17,17 +17,8 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 	if err != nil {
 		return events.APIGatewayProxyResponse{StatusCode: 404, Body: err.Error()}, nil
 	}
-	var commandsReturn []model.Command
 	// TODO 2 iterate over items to get non served commands
-	for _, command := range commands {
-		items := model.Command{}
-		items.Beer = getNoServedItemsForCommand(command.Beer)
-		items.Food = getNoServedItemsForCommand(command.Food)
-		if len(items.Beer) > 0 || len(items.Food) > 0 {
-			items.IdCommand = command.IdCommand
-			commandsReturn = append(commandsReturn, items)
-		}
-	}
+	commandsReturn := getNoServedCommands(commands)
 	// TODO 3. return unserved commands
 	body, _ := json.Marshal(commandsReturn)
 	fmt.Println("unserved commands return ", string(body))
@@ -35,9 +26,10 @@ func Handler(request events.APIGatewayProxyRequest) (events.APIGatewayProxyRespo
 }
 
 // TODO 2. complete function to return no served items
-func getNoServedItemsForCommand(items []model.Item) (noServedItems []model.Item) {
+func getNoServedCommands(items []model.Command) ([]model.Command) {
+	noServedItems := []model.Command{}
 	for _, item := range items {
-		if item.Served == false {
+		if (!item.Beer.Served && item.Beer.Amount > 0) || (!item.Food.Served && item.Food.Amount > 0) {
 			noServedItems = append(noServedItems, item)
 		}
 	}
